@@ -17,6 +17,7 @@ def discretize_data(data, n_bins=10):
   for n in range(n_features):
     bins = np.linspace(np.min(data[:, n]), np.max(data[:,n]), n_bins)
     data_out[:,n]= np.digitize(data[:, n], bins)
+  
   return data_out
 
 def read_file(file_name, sep=',', n_bins=None):

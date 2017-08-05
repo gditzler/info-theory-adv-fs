@@ -6,6 +6,12 @@ delta = 1e-3
 
 def MI(X, Y):
   """Estimate the mutual information
+  Args:
+    X (numpy array): vector of random variables  
+    Y (numpy array): vector of random variables  
+
+  Returns:
+    MI (float): Mutual Information
   """
   return H(X)-Hc(X, Y)
 
