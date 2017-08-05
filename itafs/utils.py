@@ -8,7 +8,7 @@ def discretize_data(data, nbins=10):
     data (2D numpy array): Data set with n_samples \x n_features 
     nbins (int): Number of bins to discretize the data 
 
-    Returns:
+  Returns:
     data (2D numpy array): Discretize data set with n_samples \x n_features
   """
   data_out = data.copy()
