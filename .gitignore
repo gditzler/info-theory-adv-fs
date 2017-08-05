@@ -1,0 +1,7 @@
+# folders 
+*.ipynb_checkpoints/
+itafs/__pycache__/
+
+# files 
+*.pyc 
+*.swp 
