@@ -1,101 +1,116 @@
 #!/usr/bin/env python 
 
 import numpy as np
+import ctypes as c
 
-delta = 1e-3
+Tool = c.CDLL('libMIToolbox.so')
 
-def MI(X, Y):
-  """Estimate the mutual information
-  Args:
-    X (numpy array): vector of random variables  
-    Y (numpy array): vector of random variables  
 
-  Returns:
-    MI (float): Mutual Information
+def cmi(x, y, z):
+  """d
   """
-  return H(X)-Hc(X, Y)
 
-def H(X):
-  """Estimate the Entropy of a sequence of random varriables
-  Args:
-    X (numpy array): vector of random variables  
+  n_observations = x.shape[0]
 
-  Returns:
-    H (float): Entropy
+  x = 1.0*np.array(x, order="F")
+  y = 1.0*np.array(y, order="F")
+  z = 1.0*np.array(z, order="F")
+
+  function = Tool.calculateConditionalMutualInformation
+  function.restype = c.c_double
+
+  result = function( x.ctypes.data_as(c.POINTER(c.c_double)), y.ctypes.data_as(c.POINTER(c.c_double)), z.ctypes.data_as(c.POINTER(c.c_double)), c.c_int(n_observations))
+  return result
+
+
+def mi(x, y):
+  """d
   """
-  pX = P(X)
-  z = 0.
-  for p in pX: 
-    if p >= delta:
-      z += p*np.log(p)/np.log(2)
-  z *= -1.
-  return z 
 
-def Hc(X, Y):
-  """Estimate the Conditional Entropy of a sequence of random varriables
-  Args:
-    X (numpy array): vector of random variables  
-    Y (numpy array): vector of random variables  
+  n_observations = x.shape[0]
 
-  Returns:
-    Hc (float): Conditional Entropy
+  x = 1.0*np.array(x, order="F")
+  y = 1.0*np.array(y, order="F")
+
+  function = Tool.calculateMutualInformation
+  function.restype = c.c_double
+
+  result = function( x.ctypes.data_as(c.POINTER(c.c_double)), y.ctypes.data_as(c.POINTER(c.c_double)), c.c_int(n_observations))
+  return result
+
+def joint(x, y, z):
+  """d
   """
-  z = 0.
-  norm = 0.
-  X_unique = np.unique(X)
-  Y_unique = np.unique(Y)
 
-  for x in X_unique:
-    for y in Y_unique: 
-      norm += np.sum(1.*(X==x) * (Y==y))
+  n_observations = x.shape[0]
 
-  for x in X_unique:
-    for y in Y_unique: 
-      p_XgY = np.sum(1.*(X==x) * (Y==y))/norm
-      p_Y = P(Y)[np.where(Y_unique==y)]
-      if p_Y >= delta and p_XgY >= delta:
-        z += p_XgY*np.log(p_XgY/p_Y)/np.log(2)
-  z *= -1.
+  x = 1.0*np.array(x, order="F")
+  y = 1.0*np.array(y, order="F")
+  z = 1.0*np.array(z, order="F")
+
+  function = Tool.mergeArrays
+  function.restype = c.c_int
+
+  result = function( x.ctypes.data_as(c.POINTER(c.c_double)), y.ctypes.data_as(c.POINTER(c.c_double)), z.ctypes.data_as(c.POINTER(c.c_double)), c.c_int(n_observations))
   return z
 
 
-def P(X, Y=None, y=None):
-  """Estimate the empirical probability distribution of P(X)
-  Args:
-    X (numpy array): vector of random variables  
-    Y (numpy array): vector of random variables (optional)  
-    y (int): conditional term (optional)  
-
-  Returns:
-    p (float): vector of probabilities 
+def entropy(data):
+  """d
   """
-  if Y is None: 
-    X_unique = np.unique(X)
-    probs = np.zeros((len(X_unique),))
-    for x,n in zip(X_unique, range(len(X_unique))):
-      probs[n] = np.sum(1.*(X==x))/len(X)
-  else:
-    Xs = X[np.where(Y==y)]
-    probs = P(Xs)
-  return probs 
 
-def KL(X, Y, symmetric=False):
-  """Calculate the KL Divergence
-  Args:
-    X (numpy array): vector of random variables  
-    Y (numpy array): vector of random variables  
-    symmetric (bool): symmetric? (optional)  
+  n_observations = data.shape[0]
+  data = 1.0*np.array(data, order="F")
 
-  Returns:
-    kl (float): KL Divergence 
+  function = Tool.calculateEntropy
+  function.restype = c.c_double
+
+  result = function(data.ctypes.data_as(c.POINTER(c.c_double)), c.c_int(n_observations))
+  return result
+
+def joint_entropy(x, y):
+  """d
   """
-  if symmetric is False: 
-    pX = P(X)
-    pY = P(Y)
-    z = 0.
-    for p, q in zip(pX, pY): 
-      if p >= delta and q >= delta:
-        z += p*np.log(p/q)/np.log(2)
-  else:
-    z = (KL(X, Y)+KL(Y, X))/2
-  return z
+
+  n_observations = x.shape[0]
+
+  x = 1.0*np.array(x, order="F")
+  y = 1.0*np.array(y, order="F")
+
+  function = Tool.calculateJointEntropy
+  function.restype = c.c_double
+
+  result = function( x.ctypes.data_as(c.POINTER(c.c_double)), y.ctypes.data_as(c.POINTER(c.c_double)), c.c_int(n_observations))
+  return result
+
+
+def conditional_entropy(x, y):
+  """d
+  """
+
+  n_observations = x.shape[0]
+
+  x = 1.0*np.array(x, order="F")
+  y = 1.0*np.array(y, order="F")
+
+  function = Tool.calculateConditionalEntropy
+  function.restype = c.c_double
+
+  result = function( x.ctypes.data_as(c.POINTER(c.c_double)), y.ctypes.data_as(c.POINTER(c.c_double)), c.c_int(n_observations))
+  return result
+
+
+def check_data(data, labels):
+  """d
+  """
+
+  if isinstance(data, np.ndarray) is False:
+    raise Exception("data must be an numpy ndarray.")
+  if isinstance(labels, np.ndarray) is False:
+    raise Exception("labels must be an numpy ndarray.")
+
+  if len(data) != len(labels):
+    raise Exception("data and labels must be the same length")
+
+  return 1.0*np.array(data, order="F"), 1.0*np.array(labels, order="F")
+
